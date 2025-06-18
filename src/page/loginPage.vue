@@ -141,7 +141,7 @@ export default {
 
             // Connexion réussie
 
-            console.log("Connecté avec succès :");
+            console.log("Connecté avec succès :"); 
             this.erreur = ""; // efface les messages d’erreur
             const userStore = useUserStore()
 

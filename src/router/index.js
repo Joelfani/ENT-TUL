@@ -119,14 +119,19 @@ router.beforeEach(async (to, from, next) => {
         const { data: { session },error } = await supabase.auth.getSession()
         if(error)
         {
-            next()
+            if (to.name !== 'login' && to.name !== 'register') {
+                next({ name: 'login' }) // par sécurité, on redirige vers login
+            } else {
+                next() // on laisse passer pour login et register
+            }
         }
         else if (!session && to.name !== 'login' && to.name !== 'register') {
+        
+        
         // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
         next({ name:'login' })
         } 
         else {
-
         //remplir le store user si il n'est pas rempli
         const userStore = useUserStore()
         if(!userStore.user){

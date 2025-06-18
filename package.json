@@ -15,7 +15,8 @@
     "pinia-plugin-persistedstate": "^4.3.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.13",
-    "vuetify": "^3.4.3"
+    "vuetify": "^3.4.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

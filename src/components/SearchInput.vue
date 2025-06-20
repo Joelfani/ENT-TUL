@@ -1,5 +1,6 @@
 <template>
     <div class="recherche-container">
+        <p>test</p>
     <select v-model="localChoix">
         <option v-for="option in options" :key="option.value" :value="option.value">
             {{ option.label }}

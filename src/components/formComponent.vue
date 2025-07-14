@@ -19,6 +19,7 @@
                 :name="input.id"
                 v-model="formData[input.id]"
                 :required="input.required ?? false"
+                :disabled="input.disabled ?? false "
             >
                 <option v-for="option in input.options" :key="option.value" :value="option.value">
                     {{ option.text }}
@@ -35,6 +36,7 @@
                 :required="input.required ?? false"
                 :min="input.min ?? 0"
                 :max="input.max ?? Infinity"
+                :step="input.step ?? 1"
             />
             <textarea
                 v-if="input.type === 'textarea'"

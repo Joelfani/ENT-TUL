@@ -37,6 +37,7 @@ import { mapStores } from 'pinia';
 import ModalComponent from './ModalComponent.vue';
 import EditUser from './compte/editUser.vue';
 import { useEditdataStore } from '@/store/editData';
+import { supabase } from '@/supabase';
 
 export default {
 name: 'TableAction',
@@ -64,6 +65,10 @@ props: {
         type: Boolean,
         default: true,
     },
+    notSuppr: {
+        type: Boolean,
+        default: false,
+    },
 },
 components: {
     ModalComponent,
@@ -77,11 +82,21 @@ methods: {
 
     // Methode pour supprimer un item
     async handleDelete() {
-    try {
-        await this.deleteStore.deleteItem(this.tableSuppr, this.id);
-    } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
+    if (this.notSuppr) {
+        await supabase
+            .from('infoc')
+            .update({prom_ele:null})
+            .eq('id', this.id);
+            this.$emit('loadData'); // Emit an event to notify parent component to reload data
+        return;
+    }else{
+        try {
+            await this.deleteStore.deleteItem(this.tableSuppr, this.id);
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+        }
     }
+    
     },
 
     // Methode pour envoyer l'id de l'item a modifier

@@ -48,6 +48,7 @@ import { mapStores } from 'pinia';
 import { selectPromStore } from '@/store/selectProm';
 import * as XLSX from "xlsx";
 import SearchInput from '@/components/SearchInput.vue';
+import { debounce } from 'lodash';
 
 export default {
     name: 'CandidatEleve',
@@ -262,14 +263,15 @@ export default {
     watch: {
         'selectPromStore.promotionCan_selected': {
             handler() {
-                this.getCandidats();
+            this.debouncedGetCandidats();
             },
-            immediate: true,// Le handler est exécuté directement lorsque le composant est monté
+            immediate: true,
         },
 
     },
     methods: {
         async getCandidats() {
+            
             this.isLoading = true;
             try {
                 const { data, error } = await supabase
@@ -289,6 +291,10 @@ export default {
                 this.isLoading = false;
             }
         },
+        // Méthode debouncée, appelée dans le watcher
+        debouncedGetCandidats: debounce(function () {
+            this.getCandidats();
+        }, 300),
         async filtrer() {   
                 if (this.critereRecherche === 'nom') {
                     try {
@@ -362,8 +368,6 @@ export default {
                 naiss: '',
                 tel: '',
                 adresse: '',
-                mail: '',
-                obs: '',
                 age: '',
                 lieu: '',
                 niveau: '6ème',
@@ -375,27 +379,14 @@ export default {
                 tel2: '',
                 fb: '',
                 ville: '',
-                etab: '',
-                finance: '',
-                etat: '',
                 pro1: '',
                 pro2: '',
                 pro3: '',
-                pres: '',
-                log: '',
                 frat: '',
                 frat2: '',
-                
-                revenu: '',
                 fixe: '',
                 autre: '',
                 comment: '',
-                frso: '',
-                frse: '',
-                maths: '',
-                ang: '',
-                motiv: '',
-                obs2: '',
             };
             },
         async addCandidat(data) {
@@ -485,14 +476,13 @@ export default {
         },
     },
     async mounted() {
-        await this.getCandidats();
         this.subscribeToTable();
         await this.getFiliere();
     },
 
     beforeUnmount() {
         // Nettoyer la souscription
-        this.realtimeStore.unsubscribeFromTable('candidat');
+        this.realtimeStore.unsubscribeFromTable('infoc', 'candidats');
     },
 };
 </script>

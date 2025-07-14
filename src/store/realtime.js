@@ -9,8 +9,7 @@ state: () => ({
 }),
 actions: {
     subscribeToTable(tableName, var_data,storeContext) {
-            const channelName = `public:${tableName}`;
-
+            const channelName = `public:${tableName}:${var_data}`;
             // ✅ Ne rien faire si déjà souscrit
             if (this.subscriptions[channelName]) {
                 return;
@@ -52,8 +51,8 @@ actions: {
             this.subscriptions[channelName] = subscription;
     },
 
-    unsubscribeFromTable(tableName) {
-    const channelName = `public:${tableName}`;
+    unsubscribeFromTable(tableName,var_data) {
+    const channelName = `public:${tableName}:${var_data}`;
     if (this.subscriptions[channelName]) {
         supabase.removeChannel(this.subscriptions[channelName]);
         delete this.subscriptions[channelName];

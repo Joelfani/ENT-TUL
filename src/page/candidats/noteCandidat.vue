@@ -27,7 +27,6 @@
         </TableComponent>
         <!-- Modal for adding a new note -->
         <ModalComponent id="send_can" title="Envoi des admis">
-
             <FormComponent :inputs="input_send" label_button="Envoyer" @submit="send_admitted"/>
         </ModalComponent>
     </div>
@@ -45,6 +44,7 @@ import { mapStores } from 'pinia';
 import { selectPromStore } from '@/store/selectProm';
 import * as XLSX from "xlsx";
 import SearchInput from '@/components/SearchInput.vue';
+import { debounce } from 'lodash';
 export default {
     name: 'NotesTemplate',
     components: {
@@ -92,15 +92,15 @@ export default {
                         })),
                         required: true
                     },
-                { id: 'id', type: 'number', label: 'Matricule:', initialValue: this.add_initialValue.matricule, required: true },
+                { id: 'rang', type: 'number', label: 'Matricule:',min:this.add_initialValue.matricule ?? 1, initialValue: this.add_initialValue.matricule, required: true },
             ];
         },
         input_mod() {
             return [
                 { id: 'id', type: 'hidden', initialValue: this.initialValues.id },
-                { id: 'ecrit', type: 'number', label: 'Ecrit:', initialValue: this.initialValues.ecrit},
-                { id: 'motivation', type: 'number', label: 'Motivation:', initialValue: this.initialValues.motivation },
-                { id: 'apreciation', type: 'number', label: 'Note', initialValue: this.initialValues.apreciation },
+                { id: 'ecrit', type: 'number', label: 'Ecrit:',step:0.01, initialValue: this.initialValues.ecrit},
+                { id: 'motivation', type: 'number', label: 'Motivation:',step:0.01, initialValue: this.initialValues.motivation },
+                { id: 'apreciation', type: 'text', label: 'Apréciation', initialValue: this.initialValues.apreciation },
                 { id: 'situ', type: 'select', label: "Situation:", initialValue: this.initialValues.situ,
                     options: [
                         { value: 'validée', text: 'validée' },
@@ -114,13 +114,14 @@ export default {
     watch: {
         'selectPromStore.promotionCan_selected': {
             handler() {
-                this.getNotes();
+            this.debouncedGetNotes();
             },
             immediate: true,
         },
     },
     methods: {
-        async getNotes() {
+        async getNotes() {  
+            console.log('Récupération des notes pour la promotion:', this.selectPromStore.promotionCan_selected);          
             this.isLoading = true;
             try {
                 const { data, error } = await supabase
@@ -139,8 +140,11 @@ export default {
                 this.isLoading = false;
             }
         },
+
+        debouncedGetNotes: debounce(function () {
+            this.getNotes();
+        }, 300),
         async filtrerNotes() {
-            this.texteRecherche = this.texteRecherche.trim(); // Nettoyage direct, trim() supprime les espaces
 
             if (this.texteRecherche === '') {
                 this.notes = this.data_before_search;
@@ -161,6 +165,7 @@ export default {
                     this.notes = [];
                 }
             }else if(this.critereRecherche === 'situ'){
+                    this.texteRecherche = this.texteRecherche.trim(); // Nettoyage direct, trim() supprime les espaces
                     this.texteRecherche = this.texteRecherche.toLowerCase();
                     if(this.texteRecherche === 'valide'|| this.texteRecherche === 'validé'){
                         this.texteRecherche = 'validée';
@@ -275,6 +280,7 @@ export default {
             const { data, error } = await supabase
                 .from('promotion')
                 .select('*')
+                .order('id', { ascending: false });
             if (error) {
                 console.error('Erreur lors de la récupération de la promotion:', error);
                 return;
@@ -284,30 +290,90 @@ export default {
         },
         async getMaxMatricule() {
             const { data, error } = await supabase
-                .from('info')
+                .from('infoc')
                 .select('rang')
+                .not('rang', 'is', null)
                 .order('rang', { ascending: false })
                 .limit(1);
-                this.add_initialValue.matricule = data[0].rang+1;
-                console.log('Matricule récupéré:', this.initialValues.matricule);
-
+                console.log('Récupération du matricule:', data);
                 
+                // Si aucun enregistrement n'existe encore
+                const maxRang = data.length > 0 ? data[0].rang : 0;
+                // Ajouter 1 au max ou démarrer à 1
+                this.add_initialValue.matricule = maxRang + 1;
             if (error) {
                 console.error('Erreur lors de la récupération du matricule:', error);
                 return '';
             }
             return;
         },
+        async send_admitted(data){
+            
+        try {
+        // 1. Récupérer les candidats "Validé" dans infoc
+        const { data: candidats, error: errorCandidats } = await supabase
+            .from('infoc')
+            .select('id,prom_ele')
+            .eq('situ', 'validée')
+            .eq('prom', this.selectPromStore.promotionCan_selected);
+                
+        if (errorCandidats) throw errorCandidats;
+        // 2. recuperation de la derniere num dans info ou le debut de numerotation saisie par l'utilisateur 
+        let num = data.rang || 0;
+        let nbr = 0;
+        
+        for (const sel of candidats) {
 
+            // 3. Vérifier s'il existe déjà dans une autre promotion
+            if (sel.prom_ele === null) {
+                try {
+                    // 4. Insérer le candidat dans la nouvelle promotion
+                    const { error: errorInsert } = await supabase
+                        .from('infoc')
+                        .update({ prom_ele: data.prom, rang: num })
+                        .eq('id', sel.id);
+                    if (errorInsert) throw errorInsert;
+                    
+                    // 5. Mettre à jour le numéro de matricule et le compteur
+                    num += 1;
+                    nbr++;
+                } 
+                catch (error) {
+                    console.error('Erreur lors de la vérification de la promotion existante:', error);
+                }
+            }
+        }
+        if (nbr === 0) {
+            alert('Aucun candidat à transférer.');
+            return;
+        } else {
+            const { data: recupname, error} = await supabase
+                .from('promotion')
+                .select('*')
+                .eq('id', data.prom);
+                console.log('data input:', data.prom);
+                console.log('recupname:', recupname[0]?.name);
+                
+            if (error) {
+                console.error('Erreur lors de la récupération de la promotion:', error);
+                return;
+            }
+            alert(`${nbr} candidat(s) transféré(s) avec succès dans la promotion ${recupname[0]?.name} !`);
+        }
+        
+            } catch (error) {
+                console.error('Erreur lors du transfert :', error);
+                alert('Erreur pendant le transfert.');
+            }
+        }
     },
     async mounted() {
-        await this.getNotes();
         this.subscribeToTable();
         
         
     },
     beforeUnmount() {
-        this.realtimeStore.unsubscribeFromTable('infoc');
+        this.realtimeStore.unsubscribeFromTable('infoc','notes');
     },
 };
 </script>

@@ -85,7 +85,7 @@ methods: {
     if (this.notSuppr) {
         await supabase
             .from('infoc')
-            .update({prom_ele:null})
+            .update({prom_ele:null, rang:null})
             .eq('id', this.id);
             this.$emit('loadData'); // Emit an event to notify parent component to reload data
         return;

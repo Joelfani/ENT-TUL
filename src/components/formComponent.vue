@@ -4,7 +4,7 @@
         <div v-for="input in inputs" :key="input.id">
             <label :for="input.id"><span v-if="input.required" style="color: red;">*</span> {{ input.label}}</label>
             <input
-            v-if="input.type === 'text' || input.type === 'email' || input.type === 'password' ||  input.type === 'date'"
+            v-if="input.type === 'text' || input.type === 'email' || input.type === 'password' ||  input.type === 'date' || input.type === 'time'"
             :type="input.type"
             class="form-control"
             :id="input.id"
@@ -60,6 +60,7 @@
     </form>
 </template>
 <script>
+
 export default {
     name: 'formComponent',
     props: {
@@ -72,8 +73,7 @@ export default {
         class_btn: {
             type: String,
             default: 'btn btn-primary'
-        }
-
+        },
     },
     data() {
     return {

@@ -295,7 +295,7 @@ export default {
         }
         },
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('infoc', 'eleves', this);
+            this.realtimeStore.subscribeToTable('infoc', 'eleves', this,'rang','desc');
         },
         exportToExcel() {
             const worksheetData = this.eleves.map(item => {

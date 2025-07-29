@@ -1,6 +1,6 @@
 <template>
 <div style="text-align: center;">
-    <a v-if="userStore.edit && !modalcompte" data-toggle="modal" :data-target="'#mod' + id" class="btn btn-primary" @click="recovery_data"> Modifier </a>
+    <a v-if="userStore.edit && !modalcompte && view_but_mod" data-toggle="modal" :data-target="'#mod' + id" class="btn btn-primary" @click="recovery_data"> Modifier </a>
 
     <a v-if="userStore.edit && modalcompte" data-toggle="modal" :data-target="'#mod' + id" class="btn btn-primary"> Modifier </a>
 
@@ -62,6 +62,10 @@ props: {
     default: false,
     },
     view_but_del: {
+        type: Boolean,
+        default: true,
+    },
+    view_but_mod: {
         type: Boolean,
         default: true,
     },

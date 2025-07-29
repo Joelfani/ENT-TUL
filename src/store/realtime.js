@@ -8,13 +8,12 @@ state: () => ({
     subscriptions: {}, // Stocker les souscriptions par table
 }),
 actions: {
-    subscribeToTable(tableName, var_data,storeContext) {
+    subscribeToTable(tableName, var_data,storeContext, key_order = 'id',order = 'desc') {
             const channelName = `public:${tableName}:${var_data}`;
             // ✅ Ne rien faire si déjà souscrit
             if (this.subscriptions[channelName]) {
                 return;
             }
-
             // Créer une nouvelle souscription
             const subscription = supabase
                 .channel(channelName)
@@ -24,9 +23,13 @@ actions: {
                 (payload) => {
                     const list = storeContext[var_data];
                     if (payload.eventType === 'INSERT') {
-                        const updatedList = [...list, payload.new].sort((a, b) => b.id - a.id);
-                        storeContext[var_data] = updatedList;
-
+                        if(order === 'desc') {
+                            const updatedList = [...list, payload.new].sort((a, b) => b[key_order] - a[key_order]);
+                            storeContext[var_data] = updatedList;
+                        }else {
+                            const updatedList = [...list, payload.new].sort((a, b) => a[key_order] - b[key_order]);
+                            storeContext[var_data] = updatedList;
+                        }
                     }else if (payload.eventType === 'UPDATE') {
                         // Mettre à jour l'élément existant
                         const index = list.findIndex(item => item.id === payload.new.id);
@@ -35,8 +38,14 @@ actions: {
                             list[index] = payload.new;
                             const updatedList = [...list];
                             updatedList[index] = payload.new;
-                            updatedList.sort((a, b) => b.id - a.id);
-                            storeContext[var_data] = updatedList;
+                            if(order === 'desc') {
+                                updatedList.sort((a, b) => b[key_order] - a[key_order]);
+                                storeContext[var_data] = updatedList;
+                            }else {
+                                updatedList.sort((a, b) => a[key_order] - b[key_order]);
+                                storeContext[var_data] = updatedList;
+                            }
+                            
                             
                         }
                     }else if (payload.eventType === 'DELETE') {

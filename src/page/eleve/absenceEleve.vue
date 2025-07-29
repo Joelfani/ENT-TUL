@@ -4,7 +4,8 @@
         <div class="header-title-table">
             <div>
                 <a v-if="userStore.add" class="btn btn-success btn-lg" data-toggle="modal" data-target="#add_absence"> Ajouter </a>
-                <!--<button class="btn btn-light btn-lg" @click="exportToExcel">Exporter vers Excel</button>-->
+                <button class="btn btn-dark btn-table btn-lg" id="tool" data-toggle="tooltip" data-placement="left" :title="tool" @click="dev_tab()">{{ label_but_dev_tab }}</button>
+                <button class="btn btn-light btn-lg" @click="exportToExcel">Exporter vers Excel</button>
             </div>
             <SearchInput 
                 :rech="texteRecherche"
@@ -15,10 +16,9 @@
                 @search="filtrer"
             />
         </div>
-        
-        <TableComponent :columns="columns" :rows="absences">
+        <TableComponent :columns="label_but_dev_tab === 'Développer' ? columns2 : columns" :rows="label_but_dev_tab === 'Développer' ? absences : absences_all" :label_but_dev_tab="label_but_dev_tab" :tool="tool" :show-actions="label_but_dev_tab === 'Développer' ? false : true">
             <template #actions="{ item }">
-                <TableAction :id="item.id" title="l'absence" table-suppr="abs" tableEdit="abs" @mod_data="dataInitialFormMod">
+                <TableAction :id="item.id" title="l'absence" table-suppr="abs" :view_but_mod="false" :view_but_del="label_but_dev_tab === 'Développer' ? false : true" @mod_data="dataInitialFormMod">
                     <template #form_modifier>
                         <FormComponent :inputs="input_mod" label_button="Modifier" @submit="modAbsence"/>
                     </template>
@@ -59,7 +59,6 @@ import { mapStores } from 'pinia';
 import * as XLSX from 'xlsx';
 import { debounce } from 'lodash';
 
-
 export default {
     name: 'AbsenceEleve',
     components: {
@@ -76,17 +75,27 @@ export default {
             texteRecherche: '',
             critereRecherche: 'nom',
             data_before_search: [],
+            data_all_before_search: [],
             add_matricule: '',
             options: [
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'ctg', label: 'Catégorie' },
             ],
             columns: [
+                { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px'},
+                { key: 'date_debut', label: 'date de debut de l\'absence / retard', style: 'min-width: 150px' },
+                { key: 'date_fin', label: 'date de fin de l\'absence / retard', style: 'min-width: 150px' },
+                { key: 'heure', label: 'Heure d\'arrivé', style: 'min-width: 150px' },
+                { key: 'ctg', label: 'Catégorie', style: 'min-width: 150px' },
+                { key: 'motif', label: 'Motif de l\'absence / retard', style: 'min-width: 150px' },
+            ],
+            columns2: [
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px', etat: true },
                 { key: 'nb_absences', label: 'Nombre d\'absences', style: 'min-width: 150px' },
                 { key: 'nb_retards', label: 'Nombre de retards', style: 'min-width: 150px' },
                 { key: 'mesure', label: 'Mesures disciplinaires', style: 'min-width: 250px' },
             ],
+            label_but_dev_tab: 'Développer',
+            tool: 'Développer le tableau',
             initialValues: {},
             add_initialValue: this.getInitialForm(),
             ctgs: [
@@ -95,12 +104,14 @@ export default {
             ],
             absences: [],
             abs_sub: [],
+            absences_all: [],
         };
     },
     computed: {
         ...mapStores(useUserStore, useSubscribeStore, selectPromStore),
         input_add() {
             return [
+                { id: 'id_ele', type: 'hidden', initialValue: this.add_initialValue.id_ele },
                 { id: 'nom', type: 'text', label: 'Nom et Prénom', placeholder: 'Le nom et prénom', initialValue: this.add_initialValue.nom, required: true , disabled: true},
                 { id: 'filiere', type: 'text', label: 'Filière', placeholder: 'La filière', initialValue: this.add_initialValue.filiere, required: true , disabled: true},
                 { id: 'genre', type: 'text', label: 'Genre', placeholder: 'Le genre', initialValue: this.add_initialValue.genre, required: true , disabled: true},
@@ -110,8 +121,6 @@ export default {
                 { id: 'date_fin', type: 'date', label: 'Date de fin de l\'absence / retard', initialValue: this.initialValues.date, required: true },
                 { id: 'heure', type: 'time', label: 'Heure d\'arrivé', initialValue: this.initialValues.heure, required: true },
                 { id: 'motif', type: 'text', label: 'Motif', placeholder: 'Entrez le motif', initialValue: this.initialValues.motif, required: true },
-                
-                //{ id: 'date', type: 'date', label: 'Date', initialValue: this.add_initialValue.date, required: true },
                 { id: 'mesure', type: 'text', label: 'Mesures disciplinaires', placeholder: 'Entrez les mesures disciplinaires', initialValue: this.add_initialValue.mesure, required: false }
             ];
         },
@@ -125,7 +134,6 @@ export default {
                 { id: 'heure', type: 'time', label: 'Heure d\'arrivé', initialValue: this.initialValues.heure, required: true },
                 { id: 'motif', type: 'text', label: 'Motif', placeholder: 'Entrez le motif', initialValue: this.initialValues.motif, required: true },
                 { id: 'mesure', type: 'text', label: 'Mesures disciplinaires', placeholder: 'Entrez les mesures disciplinaires', initialValue: this.initialValues.mesure, required: false },
-                //{ id: 'comment', type: 'textarea', label: 'Commentaires', placeholder: 'Entrez les commentaires', initialValue: this.initialValues.comment, required: false },
             ];
         },
     },
@@ -133,7 +141,14 @@ export default {
         abs_sub: {
             deep: true,
             handler() {
-                this.debouncedGetAbsences();
+                if(this.texteRecherche === ''){
+                    this.debouncedGetAbsences();
+                    console.log('Je suis dans le watcher abs_sub');
+                }
+                else{
+                    this.filtrer();
+                    console.log('Je suis dans le watcher abs_sub avec texteRecherche');
+                }
             }
         }
     },
@@ -142,37 +157,56 @@ export default {
             this.isLoading = true;
             await this.getAbsences();
         },
-        async getAbsences() {
-            try {
-                // Fetch all absence records
+        async getAllDataAbsences() {
+            try{
                 const { data, error } = await supabase
                     .from('abs')
-                    .select('id, nom, ctg, mesure')
-                    .order('nom', { ascending: true });
+                    .select('*')
+                    .order('id', { ascending: false });
 
-                    this.abs_sub = data;
                 if (error) throw error;
 
-                // Aggregate data by nom => Aggregate = regrouper les données
-                const aggregatedData = [];
-                const uniqueNames = [...new Set(data.map(item => item.nom))]; //  Ici on crée un tableau contenant chaque nom une seule fois.
+                this.abs_sub = data;
 
-                for (const nom of uniqueNames) {
-                    const records = data.filter(item => item.nom === nom); // On récupère toutes les lignes de cet élève.
-                    const nbAbsences = records.filter(item => item.ctg === 'Absence').length; // On compte le nombre d'absence
-                    const nbRetards = records.filter(item => item.ctg === 'Retard').length; // On compte le nombre de retard
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données:', error);
+                this.abs_sub = [];
+            }
+        },
+        async getAbsences() {
+            try {
+                const { data, error } = await supabase
+                    .from('abs')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                
+                if (error) throw error;
+
+                const aggregatedData = [];
+                const uniqueId_ele = [...new Set(data.map(item => item.id_ele))];
+                
+                for (const id_ele of uniqueId_ele) {
+                    const records = data.filter(item => item.id_ele === id_ele);
+                    const nbAbsences = records.filter(item => item.ctg === 'Absence').length;
+                    const nbRetards = records.filter(item => item.ctg === 'Retard').length;
                                         
                     aggregatedData.push({
                         id: records[0].id,
-                        nom: nom,
+                        nom: records[0].nom,
+                        id_ele: id_ele,
                         nb_absences: nbAbsences,
                         nb_retards: nbRetards,
+                        mesure: records[0].mesure
                     });
                 }
 
                 this.absences = aggregatedData;
-
                 this.data_before_search = aggregatedData;
+
+                this.absences_all = data;
+                this.data_all_before_search = data;
+
                 this.isLoading = false;
             } catch (error) {
                 console.error('Erreur lors de la récupération des absences:', error);
@@ -186,37 +220,37 @@ export default {
         async filtrer() {
             if (this.texteRecherche === '') {
                 this.absences = this.data_before_search;
+                this.absences_all = this.data_all_before_search;
                 return;
             }
             try {
                 const { data, error } = await supabase
                     .from('abs')
-                    .select('id, nom, ctg, date, mesure, comment')
+                    .select('*')
                     .ilike(this.critereRecherche, `%${this.texteRecherche}%`)
-                    .order('nom', { ascending: true });
+                    .order('id', { ascending: false });
                 if (error) throw error;
-
-                // Aggregate filtered data
                 const aggregatedData = [];
-                const uniqueNames = [...new Set(data.map(item => item.nom))];
-
-                for (const nom of uniqueNames) {
-                    const records = data.filter(item => item.nom === nom);
+                const uniqueId_ele = [...new Set(data.map(item => item.id_ele))];
+                
+                for (const id_ele of uniqueId_ele) {
+                    const records = data.filter(item => item.id_ele === id_ele);
                     const nbAbsences = records.filter(item => item.ctg === 'Absence').length;
                     const nbRetards = records.filter(item => item.ctg === 'Retard').length;
-                    const latestRecord = records[records.length - 1];
+                                        
                     aggregatedData.push({
-                        id: latestRecord.id,
-                        nom: nom,
+                        id: records[0].id,
+                        nom: records[0].nom,
+                        id_ele: id_ele,
                         nb_absences: nbAbsences,
                         nb_retards: nbRetards,
-                        mesure: latestRecord.mesure || '',
-                        date: latestRecord.date,
-                        comment: latestRecord.comment || '',
+                        mesure: records[0].mesure
                     });
                 }
 
                 this.absences = aggregatedData;
+                this.absences_all = data;
+                this.isLoading = false;
             } catch (error) {
                 console.error('Erreur lors de la recherche des absences:', error);
                 this.absences = [];
@@ -224,9 +258,10 @@ export default {
         },
         getInitialForm() {
             return {
+                id_ele: '',
                 nom: '',
                 filiere: '',
-                genre:'',
+                genre: '',
                 ctg: 'Absence',
                 date: '',
                 mesure: '',
@@ -247,6 +282,7 @@ export default {
                 if (error) throw error;
 
                 if (data) {
+                    this.add_initialValue.id_ele = data.id;
                     this.add_initialValue.nom = data.nom;
                     this.add_initialValue.filiere = data.filiere;
                     this.add_initialValue.genre = data.genre;
@@ -283,11 +319,15 @@ export default {
                     .eq('id', this.initialValues.id);
                 if (error) throw error;
                 alert('Absence modifiée avec succès !');
-                await this.getAbsences(); // Refresh the table
+                await this.getAbsences();
             } catch (error) {
                 console.error('Erreur lors de la modification de l\'absence:', error);
                 alert('Erreur lors de la modification de l\'absence.');
             }
+        },
+        dev_tab() {
+            this.label_but_dev_tab = this.label_but_dev_tab === 'Développer' ? 'Réduire' : 'Développer';
+            this.tool = this.label_but_dev_tab === 'Développer' ? 'Développer le tableau' : 'Réduire le tableau';
         },
         subscribeToTable() {
             this.realtimeStore.subscribeToTable('abs', 'abs_sub', this);
@@ -296,11 +336,7 @@ export default {
             const worksheetData = this.absences.map(item => {
                 const row = {};
                 this.columns.forEach(col => {
-                    if (col.key === 'date') {
-                        row[col.label] = item[col.key] ? new Date(item[col.key]).toLocaleDateString('fr-FR') : '';
-                    } else {
-                        row[col.label] = item[col.key] || '';
-                    }
+                    row[col.label] = item[col.key] || '';
                 });
                 return row;
             });
@@ -313,7 +349,8 @@ export default {
     },
     async mounted() {
         this.subscribeToTable();
-        await this.getfirstAbsence();
+        this.debouncedGetAbsences();
+        this.getAllDataAbsences();
     },
     beforeUnmount() {
         this.realtimeStore.unsubscribeFromTable('abs', 'abs_sub');

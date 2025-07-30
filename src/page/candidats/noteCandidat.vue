@@ -120,9 +120,11 @@ export default {
         },
     },
     methods: {
-        async getNotes() {  
-            console.log('Récupération des notes pour la promotion:', this.selectPromStore.promotionCan_selected);          
+        async getfirstNotes() {  
             this.isLoading = true;
+            await this.getNotes();
+        },
+        async getNotes() {  
             try {
                 const { data, error } = await supabase
                     .from('infoc')
@@ -132,7 +134,6 @@ export default {
                 if (error) throw error;
                 
                 this.notes = data;
-                this.data_before_search = data;
                 this.isLoading = false;
             } catch (error) {
                 console.error('Erreur lors de la récupération des notes:', error);
@@ -140,14 +141,13 @@ export default {
                 this.isLoading = false;
             }
         },
-
         debouncedGetNotes: debounce(function () {
-            this.getNotes();
+            this.getfirstNotes();
         }, 300),
         async filtrerNotes() {
 
             if (this.texteRecherche === '') {
-                this.notes = this.data_before_search;
+                this.getNotes();
                 return;
             }
             if (this.critereRecherche === 'nom') {

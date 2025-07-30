@@ -169,8 +169,11 @@ export default {
         },
     },
     methods: {
-        async getPostFormations() {
+        async getFirstPostFormation() {
             this.isLoading = true;
+            await this.getPostFormations();
+        },
+        async getPostFormations() {
             try {
                 const { data, error } = await supabase
                     .from('infoc')
@@ -180,7 +183,6 @@ export default {
                 if (error) throw error;
                 
                 this.postFormations = data;
-                this.data_before_search = data;
                 this.isLoading = false;
             } catch (error) {
                 console.error('Erreur lors de la récupération des post-formations:', error);
@@ -189,11 +191,11 @@ export default {
             }
         },
         debouncedGetPostFormations: debounce(function () {
-            this.getPostFormations();
+            this.getFirstPostFormation();
         }, 300),
         async filtrer() {
             if (this.texteRecherche === '') {
-                this.postFormations = this.data_before_search;
+                this.getPostFormations();
                 return;
             }
             try {

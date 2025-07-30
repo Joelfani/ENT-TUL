@@ -143,11 +143,9 @@ export default {
             handler() {
                 if(this.texteRecherche === ''){
                     this.debouncedGetAbsences();
-                    console.log('Je suis dans le watcher abs_sub');
                 }
                 else{
                     this.filtrer();
-                    console.log('Je suis dans le watcher abs_sub avec texteRecherche');
                 }
             }
         }
@@ -179,8 +177,6 @@ export default {
                     .from('abs')
                     .select('*')
                     .order('id', { ascending: false });
-
-                
                 if (error) throw error;
 
                 const aggregatedData = [];
@@ -219,8 +215,9 @@ export default {
         }, 300),
         async filtrer() {
             if (this.texteRecherche === '') {
-                this.absences = this.data_before_search;
-                this.absences_all = this.data_all_before_search;
+                this.getAbsences();
+                this.getAllDataAbsences();
+                this.isLoading = false;
                 return;
             }
             try {

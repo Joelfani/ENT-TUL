@@ -270,9 +270,11 @@ export default {
 
     },
     methods: {
-        async getCandidats() {
-            
+        async getFirstCandidat() {
             this.isLoading = true;
+            await this.getCandidats();
+        },
+        async getCandidats() {
             try {
                 const { data, error } = await supabase
                     .from('infoc')
@@ -282,8 +284,6 @@ export default {
                 if (error) throw error;
                 
                 this.candidats = data;
-
-                this.data_before_search = data; // Stocker les données avant la recherche
                 this.isLoading = false;
             } catch (error) {
                 console.error('Erreur lors de la récupération des candidats:', error);
@@ -293,7 +293,7 @@ export default {
         },
         // Méthode debouncée, appelée dans le watcher
         debouncedGetCandidats: debounce(function () {
-            this.getCandidats();
+            this.getFirstCandidat();
         }, 300),
         async filtrer() {   
                 if (this.critereRecherche === 'nom') {
@@ -314,7 +314,7 @@ export default {
                 }
                 else {
                     if (this.texteRecherche === '') {
-                        this.candidats = this.data_before_search;
+                        this.getCandidats();
                         return;
                     }else{
                         try {

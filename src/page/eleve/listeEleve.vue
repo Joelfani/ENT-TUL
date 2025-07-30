@@ -201,8 +201,11 @@ export default {
         },
     },
     methods: {
-        async getEleves() {
+        async getFirstEleves() {
             this.isLoading = true;
+            await this.getEleves();
+        },
+        async getEleves() {
             try {
                 const { data, error } = await supabase
                     .from('infoc')
@@ -212,7 +215,6 @@ export default {
                 if (error) throw error;
                 
                 this.eleves = data;
-                this.data_before_search = data;
                 this.isLoading = false;
             } catch (error) {
                 console.error('Erreur lors de la récupération des élèves:', error);
@@ -225,7 +227,7 @@ export default {
         }, 300),
         async filtrer() {
             if (this.texteRecherche === '') {
-                this.eleves = this.data_before_search;
+                this.getEleves();
                 return;
             }
             try {

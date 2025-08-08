@@ -15,11 +15,13 @@
                 @search="filtrer"
             />
         </div>
+        
         <TableComponent :columns="label_but_dev_tab === 'Développer' ? columns2 : columns" :rows="filteredRows">
             <template #actions="{ item }">
+
                 <TableAction :id="item.id" title="ou enregistrer un paiement" table-suppr="payment" :notSuppr="true" :view_but_mod="false" :neutre_but="true" label_neutre_but="Modifier" btn_neutre_class="btn-primary" btn_neutre_modal="mod" @btn_neutre_click="dataInitialFormMod(ctg,annee,moisMod,item.id)" @loadData="loadData"  :mini_title="item.nom" :view_but_del="false">
                     <template #form_modifier >
-                        <form class="form" @submit.prevent="ModPaiement({ ele_id: item.id, categorie: ctg, annee: annee, mois: moisMod, montant: montant })">
+                        <form class="form" @submit.prevent="modPaiement()">
                             <div class="form-group">
                                 <label for="montant">Categories</label>
                                 <select class="form-control" name="categorie" v-model="ctg">
@@ -44,9 +46,10 @@
                                     <option value="decembre">Décembre</option>
                                 </select>
                                 <label for="montant">Montant</label>
-                                <input type="number" class="form-control" name="montant" v-model="montant">
+                                <input type="number" class="form-control" name="montant" v-model="montant" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Enregistrer / Modifier</button>
+                            <button class="btn btn-light" data-dismiss="modal">Fermer</button>
                         </form>
                     </template>
                 </TableAction>
@@ -109,19 +112,21 @@ export default {
             ctg: 'ecolage',
             annee: 1,
             montant: null,
-            moisMod: 'fevrier',
+            moisMod: 'janvier',
+            idPay: null,
+
         };
     },
     computed: {
         ...mapStores(useUserStore, useSubscribeStore, selectPromStore),
         filteredRows() {
             return this.eleves.map(eleve => {
-                console.log(eleve.id);
                 const row = { id: eleve.id, rang: eleve.rang, nom: eleve.nom, filiere: eleve.filiere };
                 this.categories.forEach(cat => {
                     this.mois.forEach(moisItem => {
                         const key = `${cat.key}_${cat.annee}_${moisItem}`;
-                        row[key] = this.getPaiement(eleve.id, cat.key, cat.annee, moisItem);
+                        const paiement = this.getPaiement(eleve.id, cat.key, cat.annee, moisItem);
+                        row[key] = paiement ? paiement.montant : '';
                     });                    
                 });
                 return row;
@@ -146,7 +151,6 @@ export default {
     },
     methods: {
         async ecoData() {
-            this.isLoading = true;
             try {
                 const { data: eleves, error: elevesError } = await supabase
                     .from('infoc')
@@ -157,7 +161,8 @@ export default {
 
                 const { data: paiements, error: paiementsError } = await supabase
                     .from('payment')
-                    .select('*');
+                    .select('*')
+                    .order('id', { ascending: false });
                 if (paiementsError) throw paiementsError;
 
                 this.eleves = eleves;
@@ -179,7 +184,7 @@ export default {
                 this.mois.map(moisItem => ({
                     key: `${cat.key}_${cat.annee}_${moisItem}`,
                     label: `${cat.label} ${moisItem.charAt(0).toUpperCase() + moisItem.slice(1)}`,
-                    style: 'min-width: 200px; text-align: center',
+                    style: 'min-width: 200px;',
 
                 }))
             );
@@ -191,13 +196,12 @@ export default {
             ];
         },
         getPaiement(eleveId, cat, annee, mois) {
-            const p = this.paiements.find(pay => 
+            return this.paiements.find(pay => 
                 pay.ele_id === eleveId && 
                 pay.categorie === cat && 
                 pay.annee === annee && 
                 pay.mois === mois
-            );
-            return p ? p.montant : '';
+            ) || null;
         },
         async filtrer() {
             if (this.texteRecherche === '') {
@@ -243,33 +247,52 @@ export default {
                     .eq('mois', mois)
                     .maybeSingle();
                     this.montant = data ? data.montant : 0;
+                    this.idPay = data ? data.id : null;
                     if (error) throw error;
                 } 
                 catch (error) {
                     if (error.details !== 'The result contains 0 rows') {
-                        console.error('Erreur lors de la modification du paiement:', error);
-                        alert('Erreur lors de la modification du paiement.');
+                        console.error('Erreur lors de la recuperation des donnees:', error);
+                        alert('Erreur lors de la recuperation des données.');
                     }
                 }
             }
         },
-        async modPaiement(data) {
-            try {
-                const { error } = await supabase
-                    .from('payment')
-                    .update(data)
-                    .eq('id', this.initialValues.id);
-                if (error) throw error;
-                
-                alert('Paiement modifié avec succès !');
-                this.ecoData();
-            } catch (error) {
-                console.error('Erreur lors de la modification du paiement:', error);
-                alert('Erreur lors de la modification du paiement.');
+        async modPaiement() {
+            if (this.idPay) {
+                try {
+                    const { error } = await supabase
+                        .from('payment')
+                        .update({ montant: this.montant })
+                        .eq('id', this.idPay);
+                    if (error) throw error;
+                    alert('Paiement modifié avec succès !');
+                } catch (error) {
+                    console.error('Erreur lors de la modification du paiement:', error);
+                    alert('Erreur lors de la modification du paiement.');
+                }
+            }else {
+                try {
+                    const { error } = await supabase
+                        .from('payment')
+                        .insert({
+                            ele_id: this.idMod,
+                            categorie: this.ctg,
+                            annee: this.annee,
+                            mois: this.moisMod,
+                            montant: this.montant,
+                        });
+                    if (error) throw error;
+                    alert('Paiement enregistré avec succès !');
+                    this.dataInitialFormMod(this.ctg, this.annee, this.moisMod, this.idMod);
+                } catch (error) {
+                    console.error('Erreur lors de l\'enregistrement du paiement:', error);
+                    alert('Erreur lors de l\'enregistrement du paiement.');
+                }
             }
         },
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('payment', 'paiements', this, 'id', 'desc');
+            this.realtimeStore.subscribeToTable('payment', 'paiements', this);
         },
         exportToExcel() {
             const worksheetData = this.filteredRows.map(item => {

@@ -126,7 +126,6 @@ export default {
         ], required: true },
         { id: 'motif_etat_ele', type: 'text', label: "Motif et date de renvoi ou d'abandon:", placeholder: "Entrez le motif et la date de renvoi ou d'abandon", initialValue: this.initialValues.motif_etat_ele},
         { id: 'nom', type: 'text', label: "Nom et Prénom", placeholder: "Entrez le nom et prénom", initialValue: this.initialValues.nom, required: true },
-        { id: 'nom', type: 'text', label: "Nom et Prénom", placeholder: "Entrez le nom et prénom", initialValue: this.initialValues.nom, required: true },
         { id: 'prenom', type: 'text', label: "Prénom d'usage", placeholder: "Entrez le prénom d'usage", initialValue: this.initialValues.prenom, required: false },
         { id: 'filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.initialValues.filiere,
             options: this.filiere.map(item => ({

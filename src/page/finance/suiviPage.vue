@@ -5,27 +5,26 @@
     />
     <div v-else>
         <div class="header-title-table">
-        <div>
-            <button 
-            class="btn btn-light btn-lg" 
-            @click="exportToExcel"
-            >
-            Exporter vers Excel
-            </button>
-        </div>
-        <SearchInput 
-            :rech="texteRecherche"
-            :choix_rech="critereRecherche"
-            :options="options"
-            @update:rech="texteRecherche = $event"
-            @update:choix_rech="critereRecherche = $event"
-            @search="filtrer"
-        />
-        </div>
+            <div>
+                <button 
+                class="btn btn-light btn-lg" 
+                @click="exportToExcel"
+                >
+                Exporter vers Excel
+                </button>
+            </div>
+            <div class="recherche-container" style="border-radius: 10px; background:#eee;">
+                <label for="">Debut:</label>
+                <input class="form-control" type="date" v-model="dateDebut" style="margin-right: 10px;">
+                <label for="">Fin:</label>
+                <input class="form-control" type="date" v-model="dateFin">
+            </div>
         
+        </div>
         <TableComponent 
         :columns="columns" 
         :rows="suiviPaiements"
+        :showActions="false"
         >
         <template #actions="{ item }">
             <TableAction 
@@ -54,7 +53,7 @@
     import LoadingComponent from '@/components/loadingComponent.vue';
     import TableAction from '@/components/TableAction.vue';
     import TableComponent from '@/components/TableComponent.vue';
-    import SearchInput from '@/components/SearchInput.vue';
+    //import SearchInput from '@/components/SearchInput.vue';
     import { useSubscribeStore } from '@/store/realtime';
     import { useUserStore } from '@/store/user';
     import { selectPromStore } from '@/store/selectProm';
@@ -70,7 +69,6 @@
         LoadingComponent,
         TableAction,
         FormComponent,
-        SearchInput,
     },
     data() {
         return {
@@ -85,10 +83,11 @@
         ],
         suiviPaiements: [],
         columns: [
-            { key: 'time', label: 'Date', style: 'min-width: 150px' },
-            { key: 'montant', label: 'Montant', style: 'min-width: 150px' },
-            { key: 'nom', label: "Nom de l'élève", style: 'min-width: 250px', etat: true },
+            { key: 'time', label: 'Date', style: 'min-width: 100px' },
+            { key: 'montant', label: 'Montant', style: 'min-width: 120px' },
+            { key: 'nom', label: "Nom de l'élève", style: 'min-width: 250px'},
             { key: 'descriptif', label: 'Descriptif du paiement', style: 'min-width: 200px' },
+            { key: 'nom_user', label: "Nom de l'utilisateur", style: 'min-width: 150px' },
         ],
         initialValues: {},
         categories: [
@@ -102,6 +101,8 @@
             { key: 'carnet_2', label: 'Carnet de correspondance (année 2)' },
             { key: 'assurances_2', label: 'Assurances (année 2)' },
         ],
+        dateDebut: '',
+        dateFin: '',
         };
     },
     computed: {
@@ -148,6 +149,12 @@
             this.debouncedGetSuiviPaiements();
         },
         },
+        dateDebut() {
+        this.filtrer();
+        }
+        , dateFin() {
+        this.filtrer();
+        }
     },
     methods: {
         async getFirstSuiviPaiements() {
@@ -157,18 +164,22 @@
         async getSuiviPaiements() {
         try {
             const { data, error } = await supabase
-            .from('payment')
-            .select('id, time, montant, ele_id, categorie, infoc!ele_id(nom)')
+            .from('pay_track')
+            .select('id, time, montant, ele_id,descriptif, infoc!ele_id(nom),payment!id_pay(mois,annee),users!user(name_user)')
             .order('time', { ascending: false })
-            .order('id', { ascending: false });
-            if (error) throw error;
-
-            this.suiviPaiements = data.map(payment => ({
-            ...payment,
-            nom: payment.infoc?.nom || '',
-            descriptif: this.getDescriptif(payment.categorie),
+            .order('id', { ascending: false })
+            .limit(100);
+            if (error) throw error; 
+            
+            this.suiviPaiements = data.map(track => ({
+            ...track,
+            nom: track.infoc?.nom || '',
+            
+            descriptif: this.CapitalizeFirstLetter(track.descriptif) + ' ' + this.CapitalizeFirstLetter(track.payment?.mois || '') + ' ' + (track.payment?.annee || ''),
+            annee: track.payment?.annee || '',
+            nom_user: track.users?.name_user || '',
             }));
-            console.log('Suivi Paiements:', data);
+            
             
             this.isLoading = false;
         } catch (error) {
@@ -180,40 +191,39 @@
         debouncedGetSuiviPaiements: debounce(function () {
         this.getFirstSuiviPaiements();
         }, 300),
-        getDescriptif(categorie) {
-        const cat = this.categories.find(c => c.key === categorie);
-        return cat ? cat.label : categorie;
+
+        CapitalizeFirstLetter(str) {
+        return (str || '').charAt(0).toUpperCase() + (str || '').slice(1);
         },
         async filtrer() {
-        if (this.texteRecherche === '') {
+        if (this.dateDebut === '' || this.dateFin === '') {
             this.getSuiviPaiements();
             return;
         }
         try {
             const query = supabase
-            .from('payment')
-            .select('id, time, montant, ele_id, categorie, infoc!ele_id(nom, prom_ele)')
-            .is('annee', null)
-            .is('mois', null)
-            .eq('infoc.prom_ele', this.selectPromStore.promotion_selected)
-            .order('time', { ascending: false });
+            .from('pay_track')
+            .select('id, time, montant, ele_id,descriptif, infoc!ele_id(nom),payment!id_pay(mois,annee),users!user(name_user)')
+            .order('time', { ascending: false })
+            .order('id', { ascending: false })
+            .limit(100);
 
             if (this.critereRecherche === 'nom') {
-            query.ilike('infoc.nom', `%${this.texteRecherche}%`);
-            } else if (this.critereRecherche === 'montant') {
-            query.eq('montant', parseFloat(this.texteRecherche));
-            } else if (this.critereRecherche === 'categorie') {
-            query.ilike('categorie', `%${this.texteRecherche}%`);
+            query.gte('time', this.dateDebut).lte('time', this.dateFin);
             }
 
             const { data, error } = await query;
             if (error) throw error;
 
-            this.suiviPaiements = data.map(payment => ({
-            ...payment,
-            nom: payment.infoc?.nom || '',
-            descriptif: this.getDescriptif(payment.categorie),
+            this.suiviPaiements = data.map(track => ({
+            ...track,
+            nom: track.infoc?.nom || '',
+            
+            descriptif: this.CapitalizeFirstLetter(track.descriptif) + ' ' + this.CapitalizeFirstLetter(track.payment?.mois || '') + ' ' + (track.payment?.annee || ''),
+            annee: track.payment?.annee || '',
+            nom_user: track.users?.name_user || '',
             }));
+            console.log('Suivi Paiements:', this.suiviPaiements);
         } catch (error) {
             console.error('Erreur lors de la recherche des suivis de paiements:', error);
             this.suiviPaiements = [];

@@ -273,6 +273,8 @@ export default {
         async getFirstCandidat() {
             this.isLoading = true;
             await this.getCandidats();
+            console.log('je passe ici');
+            
         },
         async getCandidats() {
             try {

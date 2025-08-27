@@ -1,5 +1,4 @@
 <template>
-    {{ userStore.edit }} {{ userStore.delet }} {{ showActions }}
         <div class="table-container">
         <table class="table table-striped">
             <thead class="table-header">

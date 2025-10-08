@@ -117,7 +117,7 @@ methods: {
     async handleDelete() {
     if (this.notSuppr) {
         await supabase
-            .from('infoc')
+            .from("tul_infoc")
             .update({prom_ele:null, rang:null})
             .eq('id', this.id);
             this.$emit('loadData'); // Emit an event to notify parent component to reload data

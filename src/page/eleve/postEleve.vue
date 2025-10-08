@@ -18,7 +18,7 @@
         
         <TableComponent :columns="label_but_dev_tab === 'Développer' ? columns2 : columns" :rows="postFormations">
             <template #actions="{ item }">
-                <TableAction :id="item.id" title="la post-formation" :view_but_del="false" :notSuppr="true" tableEdit="infoc" @mod_data="dataInitialFormMod">
+                <TableAction :id="item.id" title="la post-formation" :view_but_del="false" :notSuppr="true" tableEdit="tul_infoc" @mod_data="dataInitialFormMod">
                     <template #form_modifier>
                         <FormComponent :inputs="input_mod" label_button="Modifier" @submit="modPostFormation"/>
                     </template>
@@ -60,13 +60,13 @@ export default {
             options: [
                 { value: 'rang', label: 'Matricule' },
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'filiere', label: 'Filière' },
+                { value: 'tul_filiere', label: 'Filière' },
             ],
             postFormations: [],
             columns: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 150px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px', etat: true },
-                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
                 { key: 'statut_post', label: 'Statut Post-Formation', style: 'min-width: 200px' },
                 { key: 'secteur_emploi', label: 'Secteur d\'Emploi', style: 'min-width: 150px' },
                 { key: 'duree_rech', label: 'Durée de Recherche d\'Emploi', style: 'min-width: 250px' },
@@ -79,7 +79,7 @@ export default {
             columns2: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 70px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
-                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
                 { key: 'statut_post', label: 'Statut Post-Formation', style: 'min-width: 150px' },
                 { key: 'secteur_emploi', label: 'Secteur d\'Emploi', style: 'min-width: 150px' },
                 { key: 'duree_rech', label: 'Durée de Recherche d\'Emploi', style: 'min-width: 150px' },
@@ -97,7 +97,7 @@ export default {
             return [
                 { id: 'rang', type: 'number', label: 'Matricule', placeholder: 'Entrez le matricule', initialValue: this.initialValues.rang, disabled: true },
                 { id: 'nom', type: 'text', label: 'Nom et Prénom', placeholder: 'Entrez le nom et prénom', initialValue: this.initialValues.nom, disabled: true },
-                { id: 'filiere', type: 'select', label: 'Filière', placeholder: 'Entrez la filière', initialValue: this.initialValues.filiere,
+                { id: 'tul_filiere', type: 'select', label: 'Filière', placeholder: 'Entrez la filière', initialValue: this.initialValues.filiere,
                     options: this.filiere.map(item => ({
                         value: item.nom,
                         text: item.nomlong
@@ -176,7 +176,7 @@ export default {
             
             try {
                 const { data, error } = await supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('id, rang, nom, filiere, statut_post, duree_rech, secteur_emploi, nom_entreprise, situation, type_entreprise, formalisation, type_contrat, niv_salaire')
                     .eq('prom_ele', this.selectPromStore.promotion_selected)
                     .order('rang', { ascending: false });
@@ -200,7 +200,7 @@ export default {
             }
             try {
                 const query = supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('id, rang, nom, filiere, statut_post, duree_rech, secteur_emploi, nom_entreprise, situation, type_entreprise, formalisation, type_contrat, niv_salaire')
                     .eq('prom_ele', this.selectPromStore.promotion_selected)
                     .order('id', { ascending: false });
@@ -227,7 +227,7 @@ export default {
         async getFiliere() {
             try {
                 const { data, error } = await supabase
-                    .from('filiere')
+                    .from('tul_filiere')
                     .select('*')
                     .order('id', { ascending: true });
                 if (error) throw error;
@@ -250,7 +250,7 @@ export default {
                 }
 
                 const { error } = await supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .update(cleanedData)
                     .eq('id', this.initialValues.id);
 
@@ -263,7 +263,7 @@ export default {
             }
         },
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('infoc', 'postFormations', this);
+            this.realtimeStore.subscribeToTable("tul_infoc", 'postFormations', this);
         },
         exportToExcel() {
             const worksheetData = this.postFormations.map(item => {
@@ -286,7 +286,7 @@ export default {
         this.debouncedGetPostFormations();
     },
     beforeUnmount() {
-        this.realtimeStore.unsubscribeFromTable('infoc', 'postFormations');
+        this.realtimeStore.unsubscribeFromTable("tul_infoc", 'postFormations');
     },
 };
 </script>

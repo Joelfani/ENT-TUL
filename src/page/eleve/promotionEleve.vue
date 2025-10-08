@@ -5,7 +5,7 @@
 
     <TableComponent :columns="columns" :rows="promotions">
     <template #actions="{ item }">
-        <TableAction :id="item.id" title="la promotion" table-suppr="promotion" tableEdit="promotion" @mod_data="dataInitialFormMod">
+        <TableAction :id="item.id" title="la promotion" table-suppr="tul_promotion" tableEdit="tul_promotion" @mod_data="dataInitialFormMod">
             <template #form_modifier>
                 <FormComponent :inputs="input_mod" label_button="Modifier" @submit="mod_promotion"/>
             </template>
@@ -86,7 +86,7 @@ methods: {
     async getPromotions() {
     try {
         const { data } = await supabase
-        .from('promotion')
+        .from('tul_promotion')
         .select('*')
         .order('id', { ascending: false });
 
@@ -102,7 +102,7 @@ methods: {
     // Méthodes pour ajouter une promotion
     async add_promotion(data) {
         const doubleData = await supabase
-            .from('promotion')
+            .from('tul_promotion')
             .select('*')
             .eq('name', data.name)
         if( doubleData.data.length > 0) {
@@ -117,7 +117,7 @@ methods: {
         }else{
             try {
             const { error } = await supabase
-                .from('promotion')
+                .from('tul_promotion')
                 .insert({
                 name: data.name,
                 annee1: data.annee1,
@@ -150,7 +150,7 @@ methods: {
     },
     async mod_promotion(data) {
         const doubleData = await supabase
-            .from('promotion')
+            .from('tul_promotion')
             .select('*')
             .eq('name', data.name)
         if( doubleData.data.length > 0 && doubleData.data[0].id !== data.id) {
@@ -165,7 +165,7 @@ methods: {
         }else{
             try {
                     const { error } = await supabase
-                        .from('promotion')
+                        .from('tul_promotion')
                         .update({
                         name: data.name,
                         annee1: data.annee1,
@@ -184,7 +184,7 @@ methods: {
 
     // Méthode pour souscrire aux changements en temps réel
     subscribeToPromotions() {
-        this.realtimeStore.subscribeToTable('promotion','promotions',this)
+        this.realtimeStore.subscribeToTable('tul_promotion','promotions',this)
     },
 
 
@@ -195,7 +195,7 @@ async mounted() {
 },
 beforeUnmount() {
     // Nettoyer la souscription
-    this.realtimeStore.unsubscribeFromTable('promotion');
+    this.realtimeStore.unsubscribeFromTable('tul_promotion');
 },
 };
 </script>

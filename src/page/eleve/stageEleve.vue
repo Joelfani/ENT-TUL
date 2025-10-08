@@ -18,7 +18,7 @@
         
         <TableComponent :columns="label_but_dev_tab === 'Développer' ? columns2 : columns" :rows="stages">
             <template #actions="{ item }">
-                <TableAction :id="item.id" title="le stage" :view_but_del="false" :notSuppr="true" tableEdit="infoc" @mod_data="dataInitialFormMod">
+                <TableAction :id="item.id" title="le stage" :view_but_del="false" :notSuppr="true" tableEdit="tul_infoc" @mod_data="dataInitialFormMod">
                     <template #form_modifier>
                         <FormComponent :inputs="input_mod" label_button="Modifier" @submit="modStage"/>
                     </template>
@@ -60,13 +60,13 @@ export default {
             options: [
                 { value: 'rang', label: 'Matricule' },
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'filiere', label: 'Filière' },
+                { value: 'tul_filiere', label: 'Filière' },
             ],
             stages: [],
             columns: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 150px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' ,etat:true},
-                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
                 { key: 'stage1', label: 'Stage 1', style: 'min-width: 150px' },
                 { key: 'debut1', label: 'Début 1', style: 'min-width: 150px' },
                 { key: 'fin1', label: 'Fin 1', style: 'min-width: 150px' },
@@ -90,7 +90,7 @@ export default {
             columns2: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 70px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
-                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
             ],
             label_but_dev_tab: 'Développer',
             tool: 'Développer le tableau',
@@ -104,7 +104,7 @@ export default {
             return [
                 { id: 'rang', type: 'number', label: 'Matricule', placeholder: 'Entrez le matricule', initialValue: this.initialValues.rang, disabled: true },
                 { id: 'nom', type: 'text', label: 'Nom et Prénom', placeholder: 'Entrez le nom et prénom', initialValue: this.initialValues.nom, disabled: true },
-                { id: 'filiere', type: 'select', label: 'Filière', placeholder: 'Entrez la filière', initialValue: this.initialValues.filiere,
+                { id: 'tul_filiere', type: 'select', label: 'Filière', placeholder: 'Entrez la filière', initialValue: this.initialValues.filiere,
                     options: this.filiere.map(item => ({
                         value: item.nom,
                         text: item.nomlong
@@ -149,7 +149,7 @@ export default {
         async getStages() {
             try {
                 const { data, error } = await supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('id, rang, nom, filiere, stage1, debut1, fin1, stage2, debut2, fin2, stage3, debut3, fin3, stage4, debut4, fin4, stage5, debut5, fin5, stage6, debut6, fin6, commentaire')
                     .eq('prom_ele', this.selectPromStore.promotion_selected)
                     .order('rang', { ascending: false });
@@ -173,7 +173,7 @@ export default {
             }
             try {
                 const query = supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('id, rang, nom, filiere, stage1, debut1, fin1, stage2, debut2, fin2, stage3, debut3, fin3, stage4, debut4, fin4, stage5, debut5, fin5, stage6, debut6, fin6, commentaire')
                     .eq('prom_ele', this.selectPromStore.promotion_selected)
                     .order('id', { ascending: false });
@@ -200,7 +200,7 @@ export default {
         async getFiliere() {
             try {
                 const { data, error } = await supabase
-                    .from('filiere')
+                    .from('tul_filiere')
                     .select('*')
                     .order('id', { ascending: true });
                 if (error) throw error;
@@ -224,7 +224,7 @@ export default {
                 }
 
                 const { error } = await supabase
-                .from('infoc')
+                .from("tul_infoc")
                 .update(cleanedData)
                 .eq('id', this.initialValues.id);
 
@@ -237,7 +237,7 @@ export default {
             }
         },
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('infoc', 'stages', this);
+            this.realtimeStore.subscribeToTable("tul_infoc", 'stages', this);
         },
         exportToExcel() {
             const worksheetData = this.stages.map(item => {
@@ -267,7 +267,7 @@ export default {
         await this.getFiliere();
     },
     beforeUnmount() {
-        this.realtimeStore.unsubscribeFromTable('infoc', 'stages');
+        this.realtimeStore.unsubscribeFromTable("tul_infoc", 'stages');
     },
 };
 </script>

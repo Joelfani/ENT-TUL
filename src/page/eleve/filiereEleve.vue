@@ -5,7 +5,7 @@
 
         <TableComponent :columns="columns" :rows="filieres">
             <template #actions="{ item }">
-                <TableAction :id="item.id" title="la filière" table-suppr="filiere" tableEdit="filiere" @mod_data="dataInitialFormMod">
+                <TableAction :id="item.id" title="la filière" table-suppr="tul_filiere" tableEdit="tul_filiere" @mod_data="dataInitialFormMod">
                     <template #form_modifier>
                         <FormComponent :inputs="input_mod" label_button="Modifier" @submit="modFiliere"/>
                     </template>
@@ -74,7 +74,7 @@ export default {
         async getFilieres() {
             try {
                 const { data, error } = await supabase
-                .from('filiere')
+                .from('tul_filiere')
                 .select('*')
                 .order('id', { ascending: false });
                 if (error) throw error;
@@ -90,7 +90,7 @@ export default {
         },
         async addFiliere(data) {
             const doubleData = await supabase
-                .from('filiere')
+                .from('tul_filiere')
                 .select('*')
                 .or(`nom.eq.${data.nom},nomlong.eq.${data.nomlong}`)
             if (doubleData.data.length > 0) {
@@ -98,7 +98,7 @@ export default {
                 return;
             }else{
                 try{
-                    const { error } = await supabase.from('filiere').insert([data]);
+                    const { error } = await supabase.from('tul_filiere').insert([data]);
                     if (error) {
                         throw error;
                     }
@@ -119,7 +119,7 @@ export default {
         },
         async modFiliere(data) {
             const doubleData = await supabase
-                .from('filiere')
+                .from('tul_filiere')
                 .select('*')
                 .or(`nom.eq.${data.nom},nomlong.eq.${data.nomlong}`)
                 .neq('id', this.initialValues.id);
@@ -129,7 +129,7 @@ export default {
             }else{
                 try {
                     const { error } = await supabase
-                        .from('filiere')
+                        .from('tul_filiere')
                         .update(data)
                         .eq('id', this.initialValues.id);
                         alert('Filière modifiée avec succès !');
@@ -147,7 +147,7 @@ export default {
 
         // Méthode pour souscrire aux changements en temps réel
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('filiere','filieres',this)
+            this.realtimeStore.subscribeToTable('tul_filiere','filieres',this)
         },
     },
     async mounted() {
@@ -157,7 +157,7 @@ export default {
 
     beforeUnmount() {
     // Nettoyer la souscription
-    this.realtimeStore.unsubscribeFromTable('promotion');
+    this.realtimeStore.unsubscribeFromTable('tul_promotion');
 },
 };
 </script>

@@ -134,6 +134,7 @@ export default {
             .update({
             id_ctg: parseInt(this.form.ctg),
             name_user: this.form.nom,
+            tul: true
             })
             .eq('id', user.id)
 

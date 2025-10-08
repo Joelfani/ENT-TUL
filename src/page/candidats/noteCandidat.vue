@@ -18,7 +18,7 @@
         
         <TableComponent :columns="noteColumns" :rows="notes">
         <template #actions="{ item }">
-            <TableAction :id="item.id" title="les notes" :view_but_del="false" tableEdit="infoc" @mod_data="dataInitialFormMod">
+            <TableAction :id="item.id" title="les notes" :view_but_del="false" tableEdit="tul_infoc" @mod_data="dataInitialFormMod">
             <template #form_modifier>
                 <FormComponent :inputs="input_mod" label_button="Modifier" @submit="modNote"/>
             </template>
@@ -64,13 +64,13 @@ export default {
             data_before_search: [],
             options: [
                 { value: 'nom', label: 'Nom' },
-                { value: 'filiere', label: 'Filière' },
+                { value: 'tul_filiere', label: 'Filière' },
                 { value: 'situ', label: 'Situation' },
             ],
             notes: [],
             noteColumns: [
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
-                { key: 'filiere', label: 'Filière', style: 'min-width: 150px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 150px' },
                 { key: 'ecrit', label: 'Ecrit', style: 'min-width: 100px' },
                 { key: 'motivation', label: 'Motivation', style: 'min-width: 150px' },
                 { key: 'apreciation', label: 'Apréciation', style: 'min-width: 150px' },
@@ -127,7 +127,7 @@ export default {
         async getNotes() {  
             try {
                 const { data, error } = await supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('*')
                     .eq('prom', this.selectPromStore.promotionCan_selected)
                     .order('id', { ascending: false });
@@ -153,7 +153,7 @@ export default {
             if (this.critereRecherche === 'nom') {
                 try {
                     const { data, error } = await supabase
-                        .from('infoc')
+                        .from("tul_infoc")
                         .select('*')
                         .eq('prom', this.selectPromStore.promotionCan_selected)
                         .ilike(this.critereRecherche, `%${this.texteRecherche}%`)
@@ -181,7 +181,7 @@ export default {
                     try {
                         
                         const { data, error } = await supabase
-                            .from('infoc')
+                            .from("tul_infoc")
                             .select('*')
                             .eq('prom', this.selectPromStore.promotionCan_selected)
                             .eq(this.critereRecherche, `${this.texteRecherche.toLowerCase()}`)
@@ -198,7 +198,7 @@ export default {
                 else {
                     try {
                         const { data, error } = await supabase
-                            .from('infoc')
+                            .from("tul_infoc")
                             .select('*')
                             .eq('prom', this.selectPromStore.promotionCan_selected)
                             .eq(this.critereRecherche, `${this.texteRecherche.toUpperCase()}`)
@@ -248,7 +248,7 @@ export default {
         async modNote(data) {
                 try {
                     const { error } = await supabase
-                        .from('infoc')
+                        .from("tul_infoc")
                         .update(data)
                         .eq('id', this.initialValues.id);
                     alert('Note modifiée avec succès !');
@@ -260,7 +260,7 @@ export default {
                 }
         },
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('infoc', 'notes', this);
+            this.realtimeStore.subscribeToTable("tul_infoc", 'notes', this);
         },
         exportToExcel() {
             const worksheetData = this.notes.map(item => {
@@ -278,7 +278,7 @@ export default {
         },
         async getpromotion(){
             const { data, error } = await supabase
-                .from('promotion')
+                .from('tul_promotion')
                 .select('*')
                 .order('id', { ascending: false });
             if (error) {
@@ -290,7 +290,7 @@ export default {
         },
         async getMaxMatricule() {
             const { data, error } = await supabase
-                .from('infoc')
+                .from("tul_infoc")
                 .select('rang')
                 .not('rang', 'is', null)
                 .order('rang', { ascending: false })
@@ -311,7 +311,7 @@ export default {
         try {
         // 1. Récupérer les candidats "Validé" dans infoc
         const { data: candidats, error: errorCandidats } = await supabase
-            .from('infoc')
+            .from("tul_infoc")
             .select('id,prom_ele')
             .eq('situ', 'validée')
             .eq('prom', this.selectPromStore.promotionCan_selected);
@@ -328,7 +328,7 @@ export default {
                 try {
                     // 4. Insérer le candidat dans la nouvelle promotion
                     const { error: errorInsert } = await supabase
-                        .from('infoc')
+                        .from("tul_infoc")
                         .update({ prom_ele: data.prom, rang: num })
                         .eq('id', sel.id);
                     if (errorInsert) throw errorInsert;
@@ -347,7 +347,7 @@ export default {
             return;
         } else {
             const { data: recupname, error} = await supabase
-                .from('promotion')
+                .from('tul_promotion')
                 .select('*')
                 .eq('id', data.prom);
                 
@@ -370,7 +370,7 @@ export default {
         
     },
     beforeUnmount() {
-        this.realtimeStore.unsubscribeFromTable('infoc','notes');
+        this.realtimeStore.unsubscribeFromTable("tul_infoc",'notes');
     },
 };
 </script>

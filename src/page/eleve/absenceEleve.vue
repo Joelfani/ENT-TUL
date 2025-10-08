@@ -113,7 +113,7 @@ export default {
             return [
                 { id: 'id_ele', type: 'hidden', initialValue: this.add_initialValue.id_ele },
                 { id: 'nom', type: 'text', label: 'Nom et Prénom', placeholder: 'Le nom et prénom', initialValue: this.add_initialValue.nom, required: true , disabled: true},
-                { id: 'filiere', type: 'text', label: 'Filière', placeholder: 'La filière', initialValue: this.add_initialValue.filiere, required: true , disabled: true},
+                { id: 'tul_filiere', type: 'text', label: 'Filière', placeholder: 'La filière', initialValue: this.add_initialValue.filiere, required: true , disabled: true},
                 { id: 'genre', type: 'text', label: 'Genre', placeholder: 'Le genre', initialValue: this.add_initialValue.genre, required: true , disabled: true},
                 { id: 'prom_ele', type: 'hidden', initialValue: this.add_initialValue.prom_ele},
                 { id: 'ctg', type: 'select', label: 'Catégorie', placeholder: 'Sélectionnez la catégorie', initialValue: this.add_initialValue.ctg, options: this.ctgs, required: true },
@@ -272,7 +272,7 @@ export default {
             }
             try {
                 const { data, error } = await supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('id, nom, filiere, genre, prom_ele')
                     .eq('rang', this.add_matricule)
                     .single();

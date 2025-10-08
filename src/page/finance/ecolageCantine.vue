@@ -88,7 +88,7 @@ export default {
             options: [
                 { value: 'rang', label: 'Matricule' },
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'filiere', label: 'Filière' },
+                { value: 'tul_filiere', label: 'Filière' },
             ],
             eleves: [],
             paiements: [],
@@ -103,7 +103,7 @@ export default {
             columns2: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 150px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
-                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
             ],
             label_but_dev_tab: 'Développer',
             tool: 'Développer le tableau',
@@ -153,7 +153,7 @@ export default {
         async ecoData() {
             try {
                 const { data: eleves, error: elevesError } = await supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('*')
                     .eq('prom_ele', this.selectPromStore.promotion_selected)
                     .order('rang', { ascending: false });
@@ -191,7 +191,7 @@ export default {
             this.columns = [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 150px'},
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' ,etat: true},
-                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
                 ...dynamicColumns,
             ];
         },
@@ -210,7 +210,7 @@ export default {
             }
             try {
                 const query = supabase
-                    .from('infoc')
+                    .from("tul_infoc")
                     .select('*')
                     .eq('prom_ele', this.selectPromStore.promotion_selected)
                     .order('rang', { ascending: false });

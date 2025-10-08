@@ -108,12 +108,17 @@ export default {
             // Vérifier la catégorie liée à l'email
             const { data: data_id_ctg, error: error_ctg } = await supabase
               .from('users')
-              .select('id_ctg,activer')
+              .select('id_ctg,activer,tul')
               .eq('email', this.email)
               .single();
 
             if (error_ctg || !data_id_ctg) {
               this.erreur = "Aucun compte trouvé pour cet e-mail.";
+              return;
+            }
+
+            if (data_id_ctg.tul === false) {
+              this.erreur = "Votre compte n'est pas pour cette plateforme. Veuillez contacter l'administrateur.";
               return;
             }
 
@@ -136,7 +141,11 @@ export default {
             if (authError) {
               if (authError.message === "Invalid login credentials") {
                 this.erreur = "Adresse e-mail ou mot de passe incorrect.";
-              } else {
+              } 
+              else if (authError.message?.includes('Email not confirmed')) {
+                this.erreur = 'Veuillez confirmer votre email avant de vous connecter.'
+              }
+              else {
                 this.erreur = "Une erreur inattendue s'est produite. Veuillez réessayer.";
               }
               return;

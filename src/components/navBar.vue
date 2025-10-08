@@ -359,7 +359,7 @@ export default{
         async getPromotions() {
             try {
                 const { data } = await supabase
-                .from('promotion')
+                .from('tul_promotion')
                 .select('*')
                 .order('id', { ascending: false });
 
@@ -372,7 +372,7 @@ export default{
         async getAnnees() {
             try {
                 const { data } = await supabase
-                .from('promc')
+                .from('tul_promc')
                 .select('*')
                 .order('id', { ascending: false });
 

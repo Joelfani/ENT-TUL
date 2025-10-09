@@ -70,13 +70,13 @@ export default {
             data_before_search: [],
             options: [
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'tul_filiere', label: 'Filière' },
+                { value: 'filiere', label: 'Filière' },
             ],
             candidats: [],
             columns: [
                     { key: 'nom', label: "Nom et Prénom", style: 'min-width: 250px' , etat:true},
                     { key: 'prenom', label: "Prénom d'usage", style: 'min-width: 150px' },
-                    { key: 'tul_filiere', label: "Filière", style: 'min-width: 100px' },
+                    { key: 'filiere', label: "Filière", style: 'min-width: 100px' },
                     { key: 'filiere2', label: "Voeux spécialisation à l'inscription", style: 'min-width: 250px' },
                     { key: 'genre', label: "Genre", style: 'min-width: 100px' },
                     { key: 'naiss', label: "Date de naissance", style: 'min-width: 150px' },
@@ -108,7 +108,7 @@ export default {
             columns2:[
                     { key: 'nom', label: "Nom et Prénom", style: 'min-width: 250px'},
                     { key: 'prenom', label: "Prénom d'usage", style: 'min-width: 150px' },
-                    { key: 'tul_filiere', label: "Filière", style: 'min-width: 100px' },
+                    { key: 'filiere', label: "Filière", style: 'min-width: 100px' },
                     { key: 'filiere2', label: "Voeux spécialisation à l'inscription", style: 'min-width: 250px' },
             ],
             label_but_dev_tab: 'Développer',
@@ -124,7 +124,7 @@ export default {
             return [
                 { id: 'nom', type: 'text', label: "Nom et Prénom", placeholder: "Entrez le nom et prénom", initialValue: this.add_initialValue.nom, required: true },
                 { id: 'prenom', type: 'text', label: "Prénom d'usage", placeholder: "Entrez le prénom d'usage", initialValue: this.add_initialValue.prenom, required: false },
-                { id: 'tul_filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.add_initialValue.filiere,
+                { id: 'filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.add_initialValue.filiere,
                 options: 
 
                     this.filiere.map(item => ({
@@ -194,7 +194,7 @@ export default {
         { id: 'id', type: 'hidden', initialValue: this.initialValues.id },
         { id: 'nom', type: 'text', label: "Nom et Prénom", placeholder: "Entrez le nom et prénom", initialValue: this.initialValues.nom, required: true },
         { id: 'prenom', type: 'text', label: "Prénom d'usage", placeholder: "Entrez le prénom d'usage", initialValue: this.initialValues.prenom, required: false },
-        { id: 'tul_filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.initialValues.filiere,
+        { id: 'filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.initialValues.filiere,
             options: this.filiere.map(item => ({
                 value: item.nom,
                 text: item.nomlong

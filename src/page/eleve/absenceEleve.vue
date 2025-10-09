@@ -18,7 +18,7 @@
         </div>
         <TableComponent :columns="label_but_dev_tab === 'Développer' ? columns2 : columns" :rows="label_but_dev_tab === 'Développer' ? absences : absences_all" :label_but_dev_tab="label_but_dev_tab" :tool="tool" :show-actions="label_but_dev_tab !== 'Développer' && userStore.delet? true : false">
             <template #actions="{ item }">
-                <TableAction :id="item.id" title="l'absence" table-suppr="abs" :view_but_mod="false" :view_but_del="label_but_dev_tab === 'Développer' ? false : true" @mod_data="dataInitialFormMod">
+                <TableAction :id="item.id" title="l'absence" table-suppr="tul_abs" :view_but_mod="false" :view_but_del="label_but_dev_tab === 'Développer' ? false : true" @mod_data="dataInitialFormMod">
                     <template #form_modifier>
                         <FormComponent :inputs="input_mod" label_button="Modifier" @submit="modAbsence"/>
                     </template>
@@ -113,7 +113,7 @@ export default {
             return [
                 { id: 'id_ele', type: 'hidden', initialValue: this.add_initialValue.id_ele },
                 { id: 'nom', type: 'text', label: 'Nom et Prénom', placeholder: 'Le nom et prénom', initialValue: this.add_initialValue.nom, required: true , disabled: true},
-                { id: 'tul_filiere', type: 'text', label: 'Filière', placeholder: 'La filière', initialValue: this.add_initialValue.filiere, required: true , disabled: true},
+                { id: 'filiere', type: 'text', label: 'Filière', placeholder: 'La filière', initialValue: this.add_initialValue.filiere, required: true , disabled: true},
                 { id: 'genre', type: 'text', label: 'Genre', placeholder: 'Le genre', initialValue: this.add_initialValue.genre, required: true , disabled: true},
                 { id: 'prom_ele', type: 'hidden', initialValue: this.add_initialValue.prom_ele},
                 { id: 'ctg', type: 'select', label: 'Catégorie', placeholder: 'Sélectionnez la catégorie', initialValue: this.add_initialValue.ctg, options: this.ctgs, required: true },
@@ -158,7 +158,7 @@ export default {
         async getAllDataAbsences() {
             try{
                 const { data, error } = await supabase
-                    .from('abs')
+                    .from("tul_abs")
                     .select('*')
                     .order('id', { ascending: false });
 
@@ -174,7 +174,7 @@ export default {
         async getAbsences() {
             try {
                 const { data, error } = await supabase
-                    .from('abs')
+                    .from("tul_abs")
                     .select('*')
                     .order('id', { ascending: false });
                 if (error) throw error;
@@ -222,7 +222,7 @@ export default {
             }
             try {
                 const { data, error } = await supabase
-                    .from('abs')
+                    .from("tul_abs")
                     .select('*')
                     .ilike(this.critereRecherche, `%${this.texteRecherche}%`)
                     .order('id', { ascending: false });
@@ -295,7 +295,7 @@ export default {
         },
         async addAbsence(data) {
             try {
-                const { error } = await supabase.from('abs').insert([data]);
+                const { error } = await supabase.from("tul_abs").insert([data]);
                 if (error) throw error;
                 alert('Absence ajoutée avec succès !');
                 this.add_initialValue = this.getInitialForm();
@@ -311,7 +311,7 @@ export default {
         async modAbsence(data) {
             try {
                 const { error } = await supabase
-                    .from('abs')
+                    .from("tul_abs")
                     .update(data)
                     .eq('id', this.initialValues.id);
                 if (error) throw error;
@@ -327,7 +327,7 @@ export default {
             this.tool = this.label_but_dev_tab === 'Développer' ? 'Développer le tableau' : 'Réduire le tableau';
         },
         subscribeToTable() {
-            this.realtimeStore.subscribeToTable('abs', 'abs_sub', this);
+            this.realtimeStore.subscribeToTable("tul_abs", 'abs_sub', this);
         },
         exportToExcel() {
             let worksheetData = [];
@@ -361,7 +361,7 @@ export default {
         this.getAllDataAbsences();
     },
     beforeUnmount() {
-        this.realtimeStore.unsubscribeFromTable('abs', 'abs_sub');
+        this.realtimeStore.unsubscribeFromTable("tul_abs", 'abs_sub');
     },
 };
 </script>

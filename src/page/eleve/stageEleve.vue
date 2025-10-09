@@ -60,13 +60,13 @@ export default {
             options: [
                 { value: 'rang', label: 'Matricule' },
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'tul_filiere', label: 'Filière' },
+                { value: 'filiere', label: 'Filière' },
             ],
             stages: [],
             columns: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 150px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' ,etat:true},
-                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
                 { key: 'stage1', label: 'Stage 1', style: 'min-width: 150px' },
                 { key: 'debut1', label: 'Début 1', style: 'min-width: 150px' },
                 { key: 'fin1', label: 'Fin 1', style: 'min-width: 150px' },
@@ -90,7 +90,7 @@ export default {
             columns2: [
                 { key: 'rang', label: 'Matricule', style: 'min-width: 70px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
-                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
             ],
             label_but_dev_tab: 'Développer',
             tool: 'Développer le tableau',
@@ -104,7 +104,7 @@ export default {
             return [
                 { id: 'rang', type: 'number', label: 'Matricule', placeholder: 'Entrez le matricule', initialValue: this.initialValues.rang, disabled: true },
                 { id: 'nom', type: 'text', label: 'Nom et Prénom', placeholder: 'Entrez le nom et prénom', initialValue: this.initialValues.nom, disabled: true },
-                { id: 'tul_filiere', type: 'select', label: 'Filière', placeholder: 'Entrez la filière', initialValue: this.initialValues.filiere,
+                { id: 'filiere', type: 'select', label: 'Filière', placeholder: 'Entrez la filière', initialValue: this.initialValues.filiere,
                     options: this.filiere.map(item => ({
                         value: item.nom,
                         text: item.nomlong

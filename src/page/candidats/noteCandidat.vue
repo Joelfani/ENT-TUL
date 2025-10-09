@@ -6,6 +6,7 @@
             <a v-if="userStore.add" class="btn btn-info btn-lg" data-toggle="modal" data-target="#send_can" @click="getpromotion"> Envoyer </a>
             <button class="btn btn-light btn-lg" @click="exportToExcel">Exporter vers Excel</button>
         </div>
+        {{ texteRecherche }}
         <SearchInput 
             :rech="texteRecherche"
             :choix_rech="critereRecherche"
@@ -64,13 +65,13 @@ export default {
             data_before_search: [],
             options: [
                 { value: 'nom', label: 'Nom' },
-                { value: 'tul_filiere', label: 'Filière' },
+                { value: 'filiere', label: 'Filière' },
                 { value: 'situ', label: 'Situation' },
             ],
             notes: [],
             noteColumns: [
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
-                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 150px' },
+                { key: 'filiere', label: 'Filière', style: 'min-width: 150px' },
                 { key: 'ecrit', label: 'Ecrit', style: 'min-width: 100px' },
                 { key: 'motivation', label: 'Motivation', style: 'min-width: 150px' },
                 { key: 'apreciation', label: 'Apréciation', style: 'min-width: 150px' },

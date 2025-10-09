@@ -61,14 +61,14 @@ export default {
             options: [
                 { value: 'rang', label: 'Matricule' },
                 { value: 'nom', label: 'Nom et Prénom' },
-                { value: 'tul_filiere', label: 'Filière' },
+                { value: 'filiere', label: 'Filière' },
             ],
             eleves: [],
             columns: [
                     { key: 'rang', label: 'Matricule', style: 'min-width: 150px'},
                     { key: 'nom', label: "Nom et Prénom", style: 'min-width: 250px' , etat:true},
                     { key: 'prenom', label: "Prénom d'usage", style: 'min-width: 150px' },
-                    { key: 'tul_filiere', label: "Filière", style: 'min-width: 100px' },
+                    { key: 'filiere', label: "Filière", style: 'min-width: 100px' },
                     { key: 'filiere2', label: "Voeux spécialisation à l'inscription", style: 'min-width: 250px' },
                     { key: 'etat_ele', label: 'Situation', style: 'min-width: 150px' },
                     { key: 'genre', label: "Genre", style: 'min-width: 100px' },
@@ -102,7 +102,7 @@ export default {
                 { key: 'rang', label: 'Matricule', style: 'min-width: 70px' },
                 { key: 'nom', label: 'Nom et Prénom', style: 'min-width: 250px' },
                 { key: 'prenom', label: "Prénom d'usage", style: 'min-width: 150px' },
-                { key: 'tul_filiere', label: 'Filière', style: 'min-width: 100px' },
+                { key: 'filiere', label: 'Filière', style: 'min-width: 100px' },
                 { key: 'filiere2', label: "Voeux spécialisation à l'inscription", style: 'min-width: 250px' },
                 { key: 'etat_ele', label: 'Situation', style: 'min-width: 150px' },
             ],
@@ -127,7 +127,7 @@ export default {
         { id: 'motif_etat_ele', type: 'text', label: "Motif et date de renvoi ou d'abandon:", placeholder: "Entrez le motif et la date de renvoi ou d'abandon", initialValue: this.initialValues.motif_etat_ele},
         { id: 'nom', type: 'text', label: "Nom et Prénom", placeholder: "Entrez le nom et prénom", initialValue: this.initialValues.nom, required: true },
         { id: 'prenom', type: 'text', label: "Prénom d'usage", placeholder: "Entrez le prénom d'usage", initialValue: this.initialValues.prenom, required: false },
-        { id: 'tul_filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.initialValues.filiere,
+        { id: 'filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.initialValues.filiere,
             options: this.filiere.map(item => ({
                 value: item.nom,
                 text: item.nomlong

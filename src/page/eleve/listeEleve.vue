@@ -11,7 +11,7 @@
                 :choix_rech="critereRecherche"
                 :options="options"
                 @update:rech="texteRecherche = $event"
-                @update:choix_rech="critereRecherche = $event"
+                @update:choix_rech="critereRecherche = $event" 
                 @search="filtrer"
             />
         </div>
@@ -118,15 +118,9 @@ export default {
             return [
         //{ id: 'id', type: 'hidden', initialValue: this.initialValues.id },
         { id: 'rang', type: 'number', label: 'Matricule', placeholder: 'Entrez le matricule',initialValue: this.initialValues.rang, disabled: true},
-        { id: 'etat_ele', type: 'select', label: "Situation:", initialValue: this.initialValues.etat_ele, options: [
-            { value: 'En cours', text: 'En cours' },
-            { value: 'Diplômé', text: 'Diplômé' },
-            { value: 'Abandon', text: 'Abandon' },
-            { value: 'Exclu', text: 'Exclu' },
-        ], required: true },
-        { id: 'motif_etat_ele', type: 'text', label: "Motif et date de renvoi ou d'abandon:", placeholder: "Entrez le motif et la date de renvoi ou d'abandon", initialValue: this.initialValues.motif_etat_ele},
         { id: 'nom', type: 'text', label: "Nom et Prénom", placeholder: "Entrez le nom et prénom", initialValue: this.initialValues.nom, required: true },
         { id: 'prenom', type: 'text', label: "Prénom d'usage", placeholder: "Entrez le prénom d'usage", initialValue: this.initialValues.prenom, required: false },
+        
         { id: 'filiere', type: 'select', label: "Filière", placeholder: "Entrez la filière", initialValue: this.initialValues.filiere,
             options: this.filiere.map(item => ({
                 value: item.nom,
@@ -148,6 +142,40 @@ export default {
             { value: 'M', text: 'Masculin' },
             { value: 'F', text: 'Féminin' }
         ], required: true },
+        { id: 'etat_ele', type: 'select', label: "Situation:", initialValue: this.initialValues.etat_ele, options: [
+            { value: 'En cours', text: 'En cours' },
+            { value: 'Diplômé', text: 'Diplômé' },
+            { value: 'Abandon', text: 'Abandon' },
+            { value: 'Exclu', text: 'Exclu' },
+        ], required: true },
+        { id: 'motif_etat_ele', type: 'select', label: "Motif de renvoi", initialValue: this.initialValues.motif_etat_ele, options: [
+            { value: null, text: '' },
+            { value: 'absence / retard fréquente', text: 'Absence / retard fréquente' },
+            { value: 'comportement inapproprié', text: 'Comportement inapproprié (Non respect des autres ou des consignes, insulte,...)' },
+            { value: 'faute grave', text: 'Faute grave(vol, harcèlement, abus,...)' },
+            { value: 'autre', text: 'Autre (mettre dans le commentaire)' },
+        ]},
+        { id: 'motif_abandon', type: 'select', label: "Motif de abandon",initialValue: this.initialValues.motif_abandon, options: [
+            { value: null, text: '' },
+            { value: 'raison familiale', text: 'Raison familiale' },
+            { value: 'grossesse', text: 'Grossesse' },
+            { value: 'raison financière', text: 'Raison financière' },
+            { value: 'déménagement', text: 'Déménagement' },
+            { value: 'pas motivé à continuer', text: 'Pas motivé à continuer' },
+            { value: 'maladie', text: 'Maladie' },
+            { value: 'autre', text: 'Autre (mettre dans le commentaire)' },
+        ]},
+        { id: 'participationExam', type: 'select', label: "Participation à l'examen finale",initialValue: this.initialValues.participationExam, options: [
+            { value: null, text: '' },
+            { value: 'oui', text: 'Oui' },
+            { value: 'non', text: 'Non' },
+        ]},
+        { id: 'reussite', type: 'select', label: "Réussite au exam final",initialValue: this.initialValues.reussite, options: [
+            { value: null, text: '' },
+            { value: 'Réussite', text: 'Réussite' },
+            { value: 'Échec', text: 'Échec' },
+        ]},
+        { id: 'motif_date', type: 'date', label: "Date d'abandon ou de renvoi", initialValue: this.initialValues.motif_date},
         { id: 'naiss', type: 'date', label: "Date de naissance", initialValue: this.initialValues.naiss, required: false },
         { id: 'lieu', type: 'text', label: "Lieu de naissance", placeholder: "Entrez le lieu de naissance", initialValue: this.initialValues.lieu, required: false },
         { id: 'tel', type: 'text', label: "Téléphone", placeholder: "Entrez le numéro de téléphone", initialValue: this.initialValues.tel, required: false },
@@ -174,18 +202,48 @@ export default {
         { id: 'resp', type: 'text', label: "Tuteur(personne résponsable)/organisme responsable:", placeholder: "Entrez le tuteur", initialValue: this.initialValues.resp, required: false },
         { id: 'respnom', type: 'text', label: "Nom et prénom du tuteur", placeholder: "Entrez le nom et prénom du tuteur", initialValue: this.initialValues.respnom, required: false },
         { id: 'lien', type: 'text', label: "Lien avec le tuteur", placeholder: "Entrez le lien avec le tuteur", initialValue: this.initialValues.lien, required: false },
-        { id: 'situation', type: 'text', label: "Situation d'hébergement", placeholder: "Entrez la situation d'hébergement", initialValue: this.initialValues.situation, required: false },
+        { id: 'situation', type: 'select', label: "Situation d'hébergement", placeholder: "Entrez la situation d'hébergement", initialValue: this.initialValues.situation,options: [
+                    { value: 'Habite seul.e', text: 'Habite seul.e' },
+                    { value: 'Habite avec parents', text: 'Habite avec parents' },
+                    { value: 'Habite avec famille', text: 'Habite avec famille (fratrie, grands parents,oncle et tante, etc.)' },
+                    { value: 'Habite avec connaissance ', text: 'Habite avec connaissance ' },
+                    { value: 'Vit en concubinage', text: 'Vit en concubinage' }, 
+                ], required: false },
         { id: 'tel2', type: 'text', label: "N° tél personne responsable", placeholder: "Entrez le numéro de téléphone du responsable", initialValue: this.initialValues.tel2, required: false },
         { id: 'fb', type: 'text', label: "Contact FB", placeholder: "Entrez le contact Facebook", initialValue: this.initialValues.fb, required: false },
         { id: 'ville', type: 'text', label: "Ville d'origine", placeholder: "Entrez la ville d'origine", initialValue: this.initialValues.ville, required: false },
-        { id: 'finance', type: 'text', label: "Financement des écolages", placeholder: "Entrez les informations de financement", initialValue: this.initialValues.finance, required: false },
+        { id: 'finance', type: 'text', label: "Financement des écolages", placeholder: "Entrez les informations de financement", initialValue: this.initialValues.finance, options: [
+                    { value: 'Parents', text: 'Parents' },
+                    { value: 'Famille proche', text: 'Famille proche' },
+                    { value: 'Tuteur', text: 'Tuteur' },
+                    { value: 'Association/organisme', text: 'Association/organisme' },
+                    { value: 'Lui/elle-même', text: 'Lui/elle-même' }, 
+                ], required: false },
         { id: 'pro1', type: 'text', label: "Profession du père", placeholder: "Entrez la profession du père", initialValue: this.initialValues.pro1, required: false },
         { id: 'pro2', type: 'text', label: "Profession de la mère", placeholder: "Entrez la profession de la mère", initialValue: this.initialValues.pro2, required: false },
         { id: 'pro3', type: 'text', label: "Profession du tuteur", placeholder: "Entrez la profession du tuteur", initialValue: this.initialValues.pro3, required: false },
-        { id: 'pres', type: 'text', label: "Situation matrimoniale", placeholder: "Entrez la situation matrimoniale", initialValue: this.initialValues.pres, required: false },
+        { id: 'pres', type: 'select', label: "Situation matrimoniale", placeholder: "Entrez la situation matrimoniale", initialValue: this.initialValues.pres,options: [
+                    { value: 'célibataire', text: 'Célibataire' },
+                    { value: 'mère/père célibataire', text: 'mère/père célibataire' },
+                    { value: 'Marié.e sans enfant', text: 'Marié.e sans enfant' },
+                    { value: 'Marié.e avec enfant(s)', text: 'Marié.e avec enfant(s)' },
+                    { value: 'Divorcé.e', text: 'Divorcé.e' },
+                    { value: 'Veuf.ve', text: 'Veuf.ve' },
+                ], required: false },
         { id: 'frat', type: 'text', label: "Enfants dans fratrie", placeholder: "Entrez le nombre d'enfants dans la fratrie", initialValue: this.initialValues.frat, required: false },
         { id: 'frat2', type: 'text', label: "Place dans la fratrie", placeholder: "Entrez la place dans la fratrie", initialValue: this.initialValues.frat2, required: false },
         { id: 'revenu', type: 'text', label: "Revenu mensuel moyen du foyer", placeholder: "Entrez le revenu mensuel moyen", initialValue: this.initialValues.revenu, required: false },
+        { id: 'examDelf', type: 'select', label: "Participer à l'examen DELF/DALF", initialValue: this.initialValues.examDelf,options: [
+                    { value: '', text: '' },
+                    { value: 'oui', text: 'oui' },
+                    { value: 'non', text: 'non' },
+                    { value: 'A déja eu avant', text: 'A déja eu avant' },
+                ], required: false },
+        { id: 'reussiteDelf', type: 'select', label: "Passage à l'examen DELF/DALF", initialValue: this.initialValues.reussiteDelf,options: [
+                    { value: '', text: '' },
+                    { value: 'Réussite', text: 'Réussite' },
+                    { value: 'Echec', text: 'Echec' },
+                ], required: false },
         { id: 'autre', type: 'text', label: "Dossiers manquants", placeholder: "Entrez les dossiers manquants", initialValue: this.initialValues.autre, required: false },
         { id: 'comment', type: 'textarea', label: "Commentaires/info supplémentaire", placeholder: "Entrez les commentaires ou informations supplémentaires", initialValue: this.initialValues.comment, required: false }
     ];
@@ -282,6 +340,9 @@ export default {
                 return;
             } else {
             try {
+                if(data.etat_ele != 'Abandon' && data.etat_ele != 'Exclu'){
+                    data.motif_date = null;
+                }
                 const { error } = await supabase
                     .from("tul_infoc")
                     .update(data)
@@ -291,7 +352,11 @@ export default {
                 alert('Élève modifié avec succès !');
             } catch (error) {
                 console.error('Erreur lors de la modification de l\'élève:', error);
-                alert('Erreur lors de la modification de l\'élève.');
+                if(error.message == "invalid input syntax for type date: \"\"" && (data.etat_ele === 'Abandon' || data.etat_ele === 'Exclu')){
+                    alert('Erreur : La date de renvoi ou d\'abandon doit être renseignée.');
+                } else{
+                    alert('Erreur lors de la modification de l\'élève.');
+                }
             }
         }
         },
